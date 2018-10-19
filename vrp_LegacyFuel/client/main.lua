@@ -226,8 +226,9 @@ Citizen.CreateThread(function()
 			local fuel 	   = GetVehicleFuelLevel(vehicle)
 			local fuelthis = 1
 			local newfuel  = fuel + fuelthis
+			local model = GetEntityModel(vehicle)
 
-			TriggerServerEvent('LegacyFuel:CheckServerFuelTable', plate)
+			TriggerServerEvent('LegacyFuel:CheckServerFuelTable', plate, model)
 			Citizen.Wait(150)
 
 			if newfuel < 100 then
@@ -244,11 +245,11 @@ Citizen.CreateThread(function()
 				end
 
 				for i = 1, #Vehicles do
-					if Vehicles[i].plate == plate then
-						TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, round(GetVehicleFuelLevel(vehicle), 1))
+					if Vehicles[i].plate == plate and Vehicles[i].model == model then
+						TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, round(GetVehicleFuelLevel(vehicle),1), model)
 
 						table.remove(Vehicles, i)
-						table.insert(Vehicles, {plate = plate, fuel = newfuel})
+						table.insert(Vehicles, {plate = plate, fuel = newfuel, model = model})
 
 						break
 					end
@@ -266,11 +267,11 @@ Citizen.CreateThread(function()
 				IsFueling = false
 
 				for i = 1, #Vehicles do
-					if Vehicles[i].plate == plate then
-						TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, round(GetVehicleFuelLevel(vehicle), 1))
+					if Vehicles[i].plate == plate and Vehicles[i].model == model then
+						TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, round(GetVehicleFuelLevel(vehicle), 1), model)
 
 						table.remove(Vehicles, i)
-						table.insert(Vehicles, {plate = plate, fuel = newfuel})
+						table.insert(Vehicles, {plate = plate, fuel = newfuel, model = model})
 
 						break
 					end
@@ -286,9 +287,10 @@ Citizen.CreateThread(function()
 			local jerryfuel = fuelthis * 100
 			local jerrycurr = GetAmmoInPedWeapon(GetPlayerPed(-1), 883325847)
 			local jerrynew  = jerrycurr - jerryfuel
+			local model = GetEntityModel(vehicle)
 
 			if jerrycurr >= jerryfuel then
-				TriggerServerEvent('LegacyFuel:CheckServerFuelTable', plate)
+				TriggerServerEvent('LegacyFuel:CheckServerFuelTable', plate, model)
 				Citizen.Wait(150)
 				SetPedAmmo(GetPlayerPed(-1), 883325847, round(jerrynew, 0))
 
@@ -296,11 +298,11 @@ Citizen.CreateThread(function()
 					SetVehicleFuelLevel(vehicle, newfuel)
 
 					for i = 1, #Vehicles do
-						if Vehicles[i].plate == plate then
-							TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, round(GetVehicleFuelLevel(vehicle), 1))
+						if Vehicles[i].plate == plate and Vehicles[i].model == model then
+							TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, round(GetVehicleFuelLevel(vehicle), 1), model)
 
 							table.remove(Vehicles, i)
-							table.insert(Vehicles, {plate = plate, fuel = newfuel})
+							table.insert(Vehicles, {plate = plate, fuel = newfuel, model = model})
 
 							break
 						end
@@ -318,11 +320,11 @@ Citizen.CreateThread(function()
 					IsFuelingWithJerryCan = false
 
 					for i = 1, #Vehicles do
-						if Vehicles[i].plate == plate then
-							TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, round(GetVehicleFuelLevel(vehicle), 1))
+						if Vehicles[i].plate == plate and Vehicles[i].model == model then
+							TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, round(GetVehicleFuelLevel(vehicle), 1), model)
 
 							table.remove(Vehicles, i)
-							table.insert(Vehicles, {plate = plate, fuel = newfuel})
+							table.insert(Vehicles, {plate = plate, fuel = newfuel, model = model})
 
 							break
 						end
@@ -340,11 +342,11 @@ Citizen.CreateThread(function()
 				IsFuelingWithJerryCan = false
 
 				for i = 1, #Vehicles do
-					if Vehicles[i].plate == plate then
-						TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, round(GetVehicleFuelLevel(vehicle), 1))
+					if Vehicles[i].plate == plate and Vehicles[i].model == model then
+						TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, round(GetVehicleFuelLevel(vehicle), 1), model)
 
 						table.remove(Vehicles, i)
-						table.insert(Vehicles, {plate = plate, fuel = newfuel})
+						table.insert(Vehicles, {plate = plate, fuel = newfuel, model = model})
 
 						break
 					end
@@ -407,13 +409,14 @@ Citizen.CreateThread(function()
 			local plate   = GetVehicleNumberPlateText(vehicle)
 			local fuel 	  = GetVehicleFuelLevel(vehicle)
 			local found   = false
+			local model = GetEntityModel(vehicle)
 
-			TriggerServerEvent('LegacyFuel:CheckServerFuelTable', plate)
+			TriggerServerEvent('LegacyFuel:CheckServerFuelTable', plate, model)
 
 			Citizen.Wait(500)
 
 			for i = 1, #Vehicles do
-				if Vehicles[i].plate == plate then
+				if Vehicles[i].plate == plate and Vehicles[i].model == model then
 					found = true
 					fuel  = round(Vehicles[i].fuel, 1)
 
@@ -425,9 +428,9 @@ Citizen.CreateThread(function()
 				integer = math.random(200, 800)
 				fuel 	= integer / 10
 
-				table.insert(Vehicles, {plate = plate, fuel = fuel})
+				table.insert(Vehicles, {plate = plate, fuel = fuel, model = model})
 
-				TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, fuel)
+				TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, fuel, model)
 			end
 
 			SetVehicleFuelLevel(vehicle, fuel)
@@ -511,14 +514,14 @@ AddEventHandler('LegacyFuel:ReturnFuelFromServerTable', function(vehInfo)
 	local fuel   = round(vehInfo.fuel, 1)
 
 	for i = 1, #Vehicles do
-		if Vehicles[i].plate == vehInfo.plate then
+		if Vehicles[i].plate == vehInfo.plate and Vehicles[i].model == vehInfo.model then
 			table.remove(Vehicles, i)
 
 			break
 		end
 	end
 
-	table.insert(Vehicles, {plate = vehInfo.plate, fuel = fuel})
+	table.insert(Vehicles, {plate = vehInfo.plate, fuel = fuel, model = vehInfo.model})
 end)
 
 Citizen.CreateThread(function()
@@ -527,6 +530,7 @@ Citizen.CreateThread(function()
 
 		local vehicle = GetVehiclePedIsIn(GetPlayerPed(-1))
 		local engine  = Citizen.InvokeNative(0xAE31E7DF9B5B132E, vehicle)
+		local model = GetEntityModel(vehicle)
 
 		if vehicle and engine then
 			local plate    	   = GetVehicleNumberPlateText(vehicle)
@@ -564,16 +568,16 @@ Citizen.CreateThread(function()
 			end
 
 			for i = 1, #Vehicles do
-				if Vehicles[i].plate == plate then
+				if Vehicles[i].plate == plate and Vehicles[i].model == model then
 					SetVehicleFuelLevel(vehicle, rpmfuelusage)
 
 					local updatedfuel = round(GetVehicleFuelLevel(vehicle), 1)
 
 					if updatedfuel ~= 0 then
-						TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, updatedfuel)
+						TriggerServerEvent('LegacyFuel:UpdateServerFuelTable', plate, updatedfuel, model)
 
 						table.remove(Vehicles, i)
-						table.insert(Vehicles, {plate = plate, fuel = rpmfuelusage})
+						table.insert(Vehicles, {plate = plate, fuel = rpmfuelusage, model = model})
 					end
 
 					break

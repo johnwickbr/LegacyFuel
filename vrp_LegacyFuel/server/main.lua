@@ -7,7 +7,6 @@ fuelServer = {}
 vRP = Proxy.getInterface("vRP")
 Tunnel.bindInterface("vrp_LegacyFuel", fuelServer)
 
-
 local Vehicles = {
 	{ plate = '87OJP476', fuel = 50 }
 }
@@ -21,31 +20,32 @@ end
 
 
 RegisterServerEvent('LegacyFuel:UpdateServerFuelTable')
-AddEventHandler('LegacyFuel:UpdateServerFuelTable', function(plate, fuel)
+AddEventHandler('LegacyFuel:UpdateServerFuelTable', function(plate, fuel, model)
 	local found = false
 
 	for i = 1, #Vehicles do
-		if Vehicles[i].plate == plate then 
+		if Vehicles[i].plate == plate and Vehicles[i].model == model then
 			found = true
-			
+
+			print(Vehicles[i].fuel)
 			if fuel ~= Vehicles[i].fuel then
 				table.remove(Vehicles, i)
-				table.insert(Vehicles, {plate = plate, fuel = fuel})
+				table.insert(Vehicles, {plate = plate, fuel = fuel, model = model})
 			end
 			break 
 		end
 	end
 
 	if not found then
-		table.insert(Vehicles, {plate = plate, fuel = fuel})
+		table.insert(Vehicles, {plate = plate, fuel = fuel, model = model})
 	end
 end)
 
 RegisterServerEvent('LegacyFuel:CheckServerFuelTable')
-AddEventHandler('LegacyFuel:CheckServerFuelTable', function(plate)
+AddEventHandler('LegacyFuel:CheckServerFuelTable', function(plate, model)
 	for i = 1, #Vehicles do
-		if Vehicles[i].plate == plate then
-			local vehInfo = {plate = Vehicles[i].plate, fuel = Vehicles[i].fuel}
+		if Vehicles[i].plate == plate and Vehicles[i].model == model then
+			local vehInfo = {plate = Vehicles[i].plate, fuel = Vehicles[i].fuel,model = Vehicles[i].model}
 
 			TriggerClientEvent('LegacyFuel:ReturnFuelFromServerTable', source, vehInfo)
 
