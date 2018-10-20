@@ -27,7 +27,6 @@ AddEventHandler('LegacyFuel:UpdateServerFuelTable', function(plate, fuel, model)
 		if Vehicles[i].plate == plate and Vehicles[i].model == model then
 			found = true
 
-			print(Vehicles[i].fuel)
 			if fuel ~= Vehicles[i].fuel then
 				table.remove(Vehicles, i)
 				table.insert(Vehicles, {plate = plate, fuel = fuel, model = model})
