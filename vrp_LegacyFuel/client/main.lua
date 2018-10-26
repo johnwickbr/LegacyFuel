@@ -224,7 +224,8 @@ Citizen.CreateThread(function()
 			local vehicle  = GetPlayersLastVehicle()
 			local plate    = GetVehicleNumberPlateText(vehicle)
 			local fuel 	   = GetVehicleFuelLevel(vehicle)
-			local fuelthis = 1
+			local integer = math.random(6, 10)
+			local fuelthis = integer/10
 			local newfuel  = fuel + fuelthis
 			local model = GetEntityModel(vehicle)
 
@@ -380,10 +381,10 @@ Citizen.CreateThread(function()
 		NearVehicleWithJerryCan = false
 
 		local myCoords = GetEntityCoords(GetPlayerPed(-1))
-		
+
 		for i = 1, #models do
 			local closestPump = GetClosestObjectOfType(myCoords.x, myCoords.y, myCoords.z, 1.5, models[i], false, false)
-			
+
 			if closestPump ~= nil and closestPump ~= 0 then
 				local coords    = GetEntityCoords(closestPump)
 				local vehicle   = GetPlayersLastVehicle()
@@ -442,7 +443,7 @@ Citizen.CreateThread(function()
 			if blacklistedVehicles[i] == currentVeh then
 				InBlacklistedVehicle = true
 				found 				 = true
-				
+
 				break
 			end
 		end
@@ -452,7 +453,7 @@ Citizen.CreateThread(function()
 		end
 
 		local CurrentWeapon = GetSelectedPedWeapon(GetPlayerPed(-1))
-						
+
 		if CurrentWeapon == 883325847 then
 			local MyCoords 		= GetEntityCoords(GetPlayerPed(-1))
 			local Vehicle  		= GetClosestVehicle(MyCoords.x, MyCoords.y, MyCoords.z, 3.0, false, 23) == GetPlayersLastVehicle() and GetPlayersLastVehicle() or 0
@@ -536,37 +537,17 @@ Citizen.CreateThread(function()
 			local plate    	   = GetVehicleNumberPlateText(vehicle)
 			local rpm 	   	   = GetVehicleCurrentRpm(vehicle)
 			local fuel     	   = GetVehicleFuelLevel(vehicle)
+			local usage = Config.Usage
 			local rpmfuelusage = 0
 
-			if rpm > 0.9 then
-				rpmfuelusage = fuel - rpm / 0.8
-				Citizen.Wait(1000)
-			elseif rpm > 0.8 then
-				rpmfuelusage = fuel - rpm / 1.1
-				Citizen.Wait(1500)
-			elseif rpm > 0.7 then
-				rpmfuelusage = fuel - rpm / 2.2
-				Citizen.Wait(2000)
-			elseif rpm > 0.6 then
-				rpmfuelusage = fuel - rpm / 4.1
-				Citizen.Wait(3000)
-			elseif rpm > 0.5 then
-				rpmfuelusage = fuel - rpm / 5.7
-				Citizen.Wait(4000)
-			elseif rpm > 0.4 then
-				rpmfuelusage = fuel - rpm / 6.4
-				Citizen.Wait(5000)
-			elseif rpm > 0.3 then
-				rpmfuelusage = fuel - rpm / 6.9
-				Citizen.Wait(6000)
-			elseif rpm > 0.2 then
-				rpmfuelusage = fuel - rpm / 7.3
-				Citizen.Wait(8000)
-			else
-				rpmfuelusage = fuel - rpm / 7.4
-				Citizen.Wait(15000)
+			for k, v in pairs(Config.SpecialUsage) do
+				if model == GetHashKey(k) then
+					usage = v
+					break
+				end
 			end
-
+			rpmfuelusage = fuel - rpm*usage
+			Citizen.Wait(1000/(rpm*0.3))
 			for i = 1, #Vehicles do
 				if Vehicles[i].plate == plate and Vehicles[i].model == model then
 					SetVehicleFuelLevel(vehicle, rpmfuelusage)
