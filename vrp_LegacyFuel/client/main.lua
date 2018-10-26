@@ -212,6 +212,12 @@ Citizen.CreateThread(function()
 		else
 			Citizen.Wait(500)
 		end
+		if not IsPedInAnyVehicle(GetPlayerPed(-1)) then
+			SendNUIMessage({
+				fuel = 0,
+				hide = true
+			})
+		end
 	end
 end)
 
@@ -485,28 +491,11 @@ function DisplayHud()
 	if IsPedInAnyVehicle(GetPlayerPed(-1), false) and GetSeatPedIsIn(GetPlayerPed(-1)) == -1 then
 		local vehicle = GetPlayersLastVehicle()
 		local fuel    = math.ceil(round(GetVehicleFuelLevel(vehicle), 1))
-		local kmh 	  =	round(GetEntitySpeed(vehicle) * 3.6, 0)
-		local mph 	  = round(GetEntitySpeed(vehicle) * 2.236936, 0)
 
-		if fuel == 0 then
-			fuel = "0"
-		end
-		if kmh == 0 then
-			kmh = "0"
-		end
-		if mph == 0 then
-			mph = "0"
-		end
-
-		x = 0.01135
-		y = 0.002
-
-		DrawAdvancedText(0.2195 - x, 0.77 - y, 0.005, 0.0028, 0.6, fuel, 255, 255, 255, 255, 6, 1)
-
-		DrawAdvancedText(0.130 - x, 0.77 - y, 0.005, 0.0028, 0.6, mph, 255, 255, 255, 255, 6, 1)
-		DrawAdvancedText(0.174 - x, 0.77 - y, 0.005, 0.0028, 0.6, kmh, 255, 255, 255, 255, 6, 1)
-
-		DrawAdvancedText(0.148 - x, 0.7765 - y, 0.005, 0.0028, 0.4, "mp/h              km/h              Fuel", 255, 255, 255, 255, 6, 1)
+		SendNUIMessage({
+			fuel = fuel,
+			hide = IsPauseMenuActive()
+		})
 	end
 end
 
@@ -537,7 +526,7 @@ Citizen.CreateThread(function()
 			local plate    	   = GetVehicleNumberPlateText(vehicle)
 			local rpm 	   	   = GetVehicleCurrentRpm(vehicle)
 			local fuel     	   = GetVehicleFuelLevel(vehicle)
-			local usage = Config.Usage
+			local usage        = Config.Usage
 			local rpmfuelusage = 0
 
 			for k, v in pairs(Config.SpecialUsage) do

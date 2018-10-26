@@ -1,0 +1,32 @@
+.container-fluid {
+    padding: 0;
+    margin: 0;
+    display: none;
+    font-family: Roboto;
+}
+
+.bar {
+    height: 1vw;
+    width: 14vw;
+    float: left;
+    border: black 0.1vw solid;
+    margin-top: 43.3vw;
+    margin-left: 1.1vw;
+    background-color: #353535;
+}
+#fuel {
+    height: 100%;
+    float: left;
+    background-color: #ff8418;
+}
+#text {
+    display: table-cell;
+    width: 14vw;
+    line-height: 1vw;
+    font-size: 1vw;
+    font-family: 'Roboto', sans-serif;
+    color: #ffffff;
+    position: absolute;
+    vertical-align: middle;
+    text-align: center;
+}
