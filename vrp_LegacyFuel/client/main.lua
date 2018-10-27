@@ -1,6 +1,5 @@
 -- Credits: Marmota#2533 edit for vRP; inZidiu#1 for creating the script
 local Tunnel = module("vrp", "lib/Tunnel")
-
 fuelServer = Tunnel.getInterface("vrp_LegacyFuel","vrp_LegacyFuel")
 
 models = {
@@ -84,7 +83,14 @@ end
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(1)
-
+		if nearPump and not IsCloseToLastVehicle and GetAmmoInPedWeapon(GetPlayerPed(-1),  883325847) ~= 100 and Config.EnableBuyableJerryCans then
+			if GetAmmoInPedWeapon(GetPlayerPed(-1),  883325847) > 0 then
+				DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Press ~g~E ~w~to fill your jerry can with " .. Config.JerryCanPrice*(100-GetAmmoInPedWeapon(GetPlayerPed(-1), 883325847))/100 .. "$.")
+			else
+				DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Press ~g~E ~w~to buy a jerry can with " .. Config.JerryCanPrice .. "$.")
+			end
+			fillJerryCan()
+		end
 		if not InBlacklistedVehicle then
 			if Timer then
 				DisplayHud()
@@ -95,11 +101,11 @@ Citizen.CreateThread(function()
 				local fuel 	   = round(GetVehicleFuelLevel(vehicle), 1)
 				
 				if IsPedInAnyVehicle(GetPlayerPed(-1), false) then
-					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], Lang.exitVehicle)
+					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Exit to fuel your vehicle.")
 				elseif IsFueling then
 					local position = GetEntityCoords(vehicle)
 
-					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], Lang.cancelFueling)
+					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Press ~g~G ~w~to cancel the fueling of your vehicle.")
 					DrawText3Ds(position.x, position.y, position.z + 0.5, fuel .. "%")
 					
 					DisableControlAction(0, 0, true) -- Changing view (V)
@@ -134,10 +140,19 @@ Citizen.CreateThread(function()
 						IsFueling = false
 					end
 				elseif fuel > 95.0 then
-					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], Lang.fullFuel)
+					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Vehicle is too filled with gas to be fueled.")
 				else
-					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], Lang.buyFuel)
-					
+					if GetAmmoInPedWeapon(GetPlayerPed(-1),  883325847) > 0 and GetAmmoInPedWeapon(GetPlayerPed(-1),  883325847) < 100 and Config.EnableBuyableJerryCans then
+						DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'],  "Press ~g~G ~w~to fuel your vehicle. " .. Config.FuelPrice .. "$ per liter or press ~g~E ~w~to fill your jerry can with " .. Config.JerryCanPrice*(100-GetAmmoInPedWeapon(GetPlayerPed(-1), 883325847))/100 .. "$.")
+					elseif GetAmmoInPedWeapon(GetPlayerPed(-1),  883325847) == 0 and Config.EnableBuyableJerryCansthen then
+						DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Press ~g~G ~w~to fuel your vehicle. " .. Config.FuelPrice .. "$ per liter or press ~g~E ~w~to buy a jerry can with " .. Config.JerryCanPrice .. "$.")
+					else
+						DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Press ~g~G ~w~to fuel your vehicle. " .. Config.FuelPrice .. "$ per liter.")
+					end
+					if Config.EnableBuyableJerryCans then
+						fillJerryCan()
+					end
+
 					if IsControlJustReleased(0, 47) then
 						local vehicle = GetPlayersLastVehicle()
 						local plate   = GetVehicleNumberPlateText(vehicle)
@@ -157,11 +172,11 @@ Citizen.CreateThread(function()
 			elseif NearVehicleWithJerryCan and not nearPump and Config.EnableJerryCans then
 				local vehicle  = GetPlayersLastVehicle()
 				local coords   = GetEntityCoords(vehicle)
-				local fuel 	   = round(GetVehicleFuelLevel(vehicle), 1)
+				local fuel 	   = round(GetVehicleFuelLevel(vehicle), 0)
 				local jerrycan = GetAmmoInPedWeapon(GetPlayerPed(-1), 883325847)
 				
 				if IsFuelingWithJerryCan then
-					DrawText3Ds(coords.x, coords.y, coords.z + 0.5, "Press ~g~G ~w~to cancel fueling the vehicle. Currently at: " .. fuel .. "% - Jerry Can: " .. jerrycan)
+					DrawText3Ds(coords.x, coords.y, coords.z + 0.5, "Press ~g~G ~w~to cancel fueling the vehicle. Currently at: " .. fuel .. "% - Jerry Can: " .. jerrycan .. "%")
 
 					DisableControlAction(0, 0, true) -- Changing view (V)
 					DisableControlAction(0, 22, true) -- Jumping (SPACE)
@@ -291,7 +306,7 @@ Citizen.CreateThread(function()
 			local integer   = math.random(6, 10)
 			local fuelthis  = integer / 10
 			local newfuel   = fuel + fuelthis
-			local jerryfuel = fuelthis * 100
+			local jerryfuel = fuelthis
 			local jerrycurr = GetAmmoInPedWeapon(GetPlayerPed(-1), 883325847)
 			local jerrynew  = jerrycurr - jerryfuel
 			local model = GetEntityModel(vehicle)
@@ -497,6 +512,32 @@ function DisplayHud()
 			hide = IsPauseMenuActive()
 		})
 	end
+end
+
+function fillJerryCan()
+	if IsControlJustReleased(1,  51) then
+		if GetAmmoInPedWeapon(GetPlayerPed(-1),  883325847) > 0 then
+			if fuelServer.tryPayment(Config.JerryCanPrice*(100-GetAmmoInPedWeapon(GetPlayerPed(-1), 883325847))/100) then
+				GiveWeaponToPed(GetPlayerPed(-1), 883325847, 100-GetAmmoInPedWeapon(GetPlayerPed(-1), 883325847), false, false)
+				notify("~g~Your jerry can is now full.")
+			else
+				notify("~r~You don't have enough money.")
+			end
+		else
+			if fuelServer.tryPayment(Config.JerryCanPrice) then
+				GiveWeaponToPed(GetPlayerPed(-1), 883325847, 100, false, false)
+				notify("~g~You bought a jerry can.")
+			else
+				notify("~r~You don't have enough money.")
+			end
+		end
+	end
+end
+
+function notify( text )
+	SetNotificationTextEntry( "STRING" )
+	AddTextComponentString( text )
+	DrawNotification( false, false )
 end
 
 RegisterNetEvent('LegacyFuel:ReturnFuelFromServerTable')
