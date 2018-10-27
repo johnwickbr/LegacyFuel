@@ -13,3 +13,9 @@ Config.SpecialUsage = {
     -- ["Model"] = Usage
     -- ["adder"] = 3
 }
+
+Lang = {}
+Lang.exitVehicle                = "Exit to fuel your vehicle"
+Lang.buyFuel                    = "Press ~g~G ~w~to fuel your vehicle. " .. "$" .. Config.FuelPrice .. " per Liter."
+Lang.cancelFueling              = "Press ~g~G ~w~to cancel the fueling of your vehicle."
+Lang.fullFuel                   = "Vehicle is too filled with gas to be fueled"

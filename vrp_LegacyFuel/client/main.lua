@@ -95,11 +95,11 @@ Citizen.CreateThread(function()
 				local fuel 	   = round(GetVehicleFuelLevel(vehicle), 1)
 				
 				if IsPedInAnyVehicle(GetPlayerPed(-1), false) then
-					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Exit to fuel your vehicle")
+					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], Lang.exitVehicle)
 				elseif IsFueling then
 					local position = GetEntityCoords(vehicle)
 
-					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Press ~g~G ~w~to cancel the fueling of your vehicle.")
+					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], Lang.cancelFueling)
 					DrawText3Ds(position.x, position.y, position.z + 0.5, fuel .. "%")
 					
 					DisableControlAction(0, 0, true) -- Changing view (V)
@@ -134,9 +134,9 @@ Citizen.CreateThread(function()
 						IsFueling = false
 					end
 				elseif fuel > 95.0 then
-					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Vehicle is too filled with gas to be fueled")
+					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], Lang.fullFuel)
 				else
-					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Press ~g~G ~w~to fuel your vehicle. " .. "$" .. Config.FuelPrice .. " per Liter.")
+					DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], Lang.buyFuel)
 					
 					if IsControlJustReleased(0, 47) then
 						local vehicle = GetPlayersLastVehicle()
