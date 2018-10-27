@@ -144,7 +144,7 @@ Citizen.CreateThread(function()
 				else
 					if GetAmmoInPedWeapon(GetPlayerPed(-1),  883325847) > 0 and GetAmmoInPedWeapon(GetPlayerPed(-1),  883325847) < 100 and Config.EnableBuyableJerryCans then
 						DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'],  "Press ~g~G ~w~to fuel your vehicle. " .. Config.FuelPrice .. "$ per liter or press ~g~E ~w~to fill your jerry can with " .. Config.JerryCanPrice*(100-GetAmmoInPedWeapon(GetPlayerPed(-1), 883325847))/100 .. "$.")
-					elseif GetAmmoInPedWeapon(GetPlayerPed(-1),  883325847) == 0 and Config.EnableBuyableJerryCansthen then
+					elseif GetAmmoInPedWeapon(GetPlayerPed(-1),  883325847) == 0 and Config.EnableBuyableJerryCans then
 						DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Press ~g~G ~w~to fuel your vehicle. " .. Config.FuelPrice .. "$ per liter or press ~g~E ~w~to buy a jerry can with " .. Config.JerryCanPrice .. "$.")
 					else
 						DrawText3Ds(pumpLoc['x'], pumpLoc['y'], pumpLoc['z'], "Press ~g~G ~w~to fuel your vehicle. " .. Config.FuelPrice .. "$ per liter.")
