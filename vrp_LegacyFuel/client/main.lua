@@ -1,6 +1,4 @@
 -- Credits: Marmota#2533 edit for vRP; inZidiu#1 for creating the script
-local Tunnel = module("vrp", "lib/Tunnel")
-fuelServer = Tunnel.getInterface("vrp_LegacyFuel","vrp_LegacyFuel")
 
 models = {
 	[1] = -2007231801,
@@ -29,6 +27,7 @@ local IsFueling 			  = false
 local IsFuelingWithJerryCan   = false
 local InBlacklistedVehicle	  = false
 local NearVehicleWithJerryCan = false
+local money                   = 0
 
 function DrawText3Ds(x,y,z, text)
     local onScreen,_x,_y=World3dToScreen2d(x,y,z)
@@ -154,19 +153,23 @@ Citizen.CreateThread(function()
 					end
 
 					if IsControlJustReleased(0, 47) then
-						local vehicle = GetPlayersLastVehicle()
-						local plate   = GetVehicleNumberPlateText(vehicle)
+						if Config.FuelPrice <= money then
+							local vehicle = GetPlayersLastVehicle()
+							local plate   = GetVehicleNumberPlateText(vehicle)
 
-						ClearPedTasksImmediately(GetPlayerPed(-1))
+							ClearPedTasksImmediately(GetPlayerPed(-1))
 
-						if GetSelectedPedWeapon(GetPlayerPed(-1)) ~= -1569615261 then
-							SetCurrentPedWeapon(GetPlayerPed(-1), -1569615261, true)
-							Citizen.Wait(1000)
+							if GetSelectedPedWeapon(GetPlayerPed(-1)) ~= -1569615261 then
+								SetCurrentPedWeapon(GetPlayerPed(-1), -1569615261, true)
+								Citizen.Wait(1000)
+							end
+
+							IsFueling = true
+
+							FuelVehicle()
+						else
+							notify("~r~You don't have enough money.")
 						end
-
-						IsFueling = true
-
-						FuelVehicle()
 					end
 				end
 			elseif NearVehicleWithJerryCan and not nearPump and Config.EnableJerryCans then
@@ -255,7 +258,8 @@ Citizen.CreateThread(function()
 
 			if newfuel < 100 then
 				SetVehicleFuelLevel(vehicle, newfuel)
-				IsFueling = fuelServer.tryPayment(fuelthis * Config.FuelPrice)
+				IsFueling = Config.FuelPrice <= money
+				TriggerServerEvent("LegacyFuel:PayFuel", fuelthis * Config.FuelPrice)
 				if not IsFueling then
 					loadAnimDict("reaction@male_stand@small_intro@forward")
 					TaskPlayAnim(GetPlayerPed(-1), "reaction@male_stand@small_intro@forward", "react_forward_small_intro_a", 1.0, 2, -1, 49, 0, 0, 0, 0)
@@ -456,6 +460,8 @@ Citizen.CreateThread(function()
 			end
 
 			SetVehicleFuelLevel(vehicle, fuel)
+		elseif nearPump and not IsFueling then
+			TriggerServerEvent("LegacyFuel:GetMoneyOnHand")
 		end
 
 		local currentVeh = GetDisplayNameFromVehicleModel(GetEntityModel(GetVehiclePedIsUsing(GetPlayerPed(-1))))
@@ -517,14 +523,17 @@ end
 function fillJerryCan()
 	if IsControlJustReleased(1,  51) then
 		if GetAmmoInPedWeapon(GetPlayerPed(-1),  883325847) > 0 then
-			if fuelServer.tryPayment(Config.JerryCanPrice*(100-GetAmmoInPedWeapon(GetPlayerPed(-1), 883325847))/100) then
+			local price = Config.JerryCanPrice*(100-GetAmmoInPedWeapon(GetPlayerPed(-1), 883325847))/100
+			if price <= money then
+				TriggerServerEvent("LegacyFuel:PayFuel",price)
 				GiveWeaponToPed(GetPlayerPed(-1), 883325847, 100-GetAmmoInPedWeapon(GetPlayerPed(-1), 883325847), false, false)
 				notify("~g~Your jerry can is now full.")
 			else
 				notify("~r~You don't have enough money.")
 			end
 		else
-			if fuelServer.tryPayment(Config.JerryCanPrice) then
+			if Config.JerryCanPrice <= money then
+				TriggerServerEvent("LegacyFuel:PayFuel",Config.JerryCanPrice)
 				GiveWeaponToPed(GetPlayerPed(-1), 883325847, 100, false, false)
 				notify("~g~You bought a jerry can.")
 			else
@@ -553,6 +562,11 @@ AddEventHandler('LegacyFuel:ReturnFuelFromServerTable', function(vehInfo)
 	end
 
 	table.insert(Vehicles, {plate = vehInfo.plate, fuel = fuel, model = vehInfo.model})
+end)
+
+RegisterNetEvent("LegacyFuel:ReturnMoneyOnHand")
+AddEventHandler("LegacyFuel:ReturnMoneyOnHand", function(rMoney)
+	money = rMoney
 end)
 
 Citizen.CreateThread(function()

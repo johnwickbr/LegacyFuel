@@ -1,22 +1,23 @@
 -- Credits: Marmota#2533 edit for vRP; inZidiu#1 for creating the script
-local Tunnel = module("vrp", "lib/Tunnel")
 local Proxy = module("vrp", "lib/Proxy")
 
-
-fuelServer = {}
 vRP = Proxy.getInterface("vRP")
-Tunnel.bindInterface("vrp_LegacyFuel", fuelServer)
 
 local Vehicles = {
 	{ plate = '87OJP476', fuel = 50 }
 }
 
-function fuelServer.tryPayment(amount)
+RegisterServerEvent("LegacyFuel:GetMoneyOnHand")
+AddEventHandler("LegacyFuel:GetMoneyOnHand",function ()
 	local source = source
-	local user_id = vRP.getUserId(source)
+	TriggerClientEvent("LegacyFuel:ReturnMoneyOnHand",source,vRP.getMoney({vRP.getUserId({source})}))
+end)
 
-	return vRP.tryPayment(user_id, amount)
-end
+RegisterServerEvent("LegacyFuel:PayFuel")
+AddEventHandler("LegacyFuel:PayFuel",function (price)
+	vRP.tryPayment({vRP.getUserId({source}), price})
+	TriggerClientEvent("LegacyFuel:ReturnMoneyOnHand",source,vRP.getMoney({vRP.getUserId({source})}))
+end)
 
 
 RegisterServerEvent('LegacyFuel:UpdateServerFuelTable')
